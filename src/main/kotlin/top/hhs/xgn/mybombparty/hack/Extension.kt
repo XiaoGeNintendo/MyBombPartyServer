@@ -10,3 +10,15 @@ suspend fun WebSocketSession.receiveString():String{
         }
     }
 }
+
+fun String.checkValid(lengthThreshold:Int=30):Boolean{
+    if(isEmpty() || length>lengthThreshold){
+        return false
+    }
+
+    if("#".any { it in this }){
+        return false
+    }
+
+    return true
+}

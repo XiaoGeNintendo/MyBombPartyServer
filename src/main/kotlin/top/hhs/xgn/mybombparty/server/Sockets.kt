@@ -11,6 +11,7 @@ import top.hhs.xgn.mybombparty.data.GameRoom
 import top.hhs.xgn.mybombparty.data.GameRoomPreview
 import top.hhs.xgn.mybombparty.data.GameState
 import top.hhs.xgn.mybombparty.data.Player
+import top.hhs.xgn.mybombparty.hack.checkValid
 import top.hhs.xgn.mybombparty.hack.receiveString
 import java.time.Duration
 import java.util.*
@@ -45,13 +46,31 @@ fun Application.configureSockets() {
                 close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT,"Invalid Client Version"))
                 return@webSocket
             }
-            val room=receiveDeserialized<GameRoomPreview>()
-            val newID= UUID.randomUUID().toString()
-            if(newID in MainData.rooms){
-                close(CloseReason(CloseReason.Codes.TRY_AGAIN_LATER,"Bad ID"))
-            }else{
-                MainData.rooms[newID]=room.toGameRoom()
-                close(CloseReason(CloseReason.Codes.NORMAL,"OK"))
+            try {
+                val room = receiveDeserialized<GameRoomPreview>()
+                if(!room.name.checkValid()){
+                    close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT,"Invalid name"))
+                    return@webSocket
+                }
+                if(room.lang !in MainData.dicts){
+                    close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT,"Bad language"))
+                    return@webSocket
+                }
+                if(room.segments !in MainData.segments){
+                    close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT,"Bad segment"))
+                    return@webSocket
+                }
+
+                val newID = UUID.randomUUID().toString()
+                if (newID in MainData.rooms) {
+                    close(CloseReason(CloseReason.Codes.TRY_AGAIN_LATER, "Bad ID"))
+                } else {
+                    MainData.rooms[newID] = room.toGameRoom()
+                    close(CloseReason(CloseReason.Codes.NORMAL, "OK"))
+                }
+            }catch(e:Exception){
+                System.err.println("Cannot create room:")
+                e.printStackTrace()
             }
         }
 
@@ -67,6 +86,12 @@ fun Application.configureSockets() {
             }
 
             val userName=receiveString()
+
+            if(!userName.checkValid()){
+                close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT,"Bad username"))
+                return@webSocket
+            }
+
             val room= MainData.rooms[roomID]!!
 
             sendSerialized(room) //send current room first
@@ -92,6 +117,10 @@ fun Application.configureSockets() {
                 try{
                     while(true){
                         val msg=receiveString().trim()
+                        if(!msg.checkValid(1000)){
+                            //directly reject
+                            continue
+                        }
                         if(msg=="start"){
                             if(room.isAdmin(userName) && room.state!=GameState.RUNNING && room.players.size>=2){
                                 room.start()
