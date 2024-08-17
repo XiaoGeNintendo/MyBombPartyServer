@@ -20,10 +20,8 @@ data class GameRoom(val name:String, val lang:String, val segments:String, val t
     var currentSegment="?"
     var currentFail=0
 
+    var winner=""
     var timeLeft=0
-    val winner
-        get()=players.first { it.alive }
-
     fun toPreview() = GameRoomPreview(name,lang,segments,timeout,rewardThreshold,initialLife,changeAfterFails,players.size,state)
 
     /**
@@ -48,6 +46,22 @@ data class GameRoom(val name:String, val lang:String, val segments:String, val t
 
     fun getRandomSegment():String{
         return MainData.segments[segments]!!.random()
+    }
+
+    suspend fun tickKick(){
+        if(state==GameState.RUNNING){
+            return
+        }
+
+        val toRemove=HashSet<Player>()
+        players.forEach{
+            if(!it.online){
+                broadcast("kick ${it.name}")
+                toRemove.add(it)
+            }
+        }
+
+        players.removeAll(toRemove)
     }
 
     suspend fun broadcast(message:String){
@@ -100,8 +114,20 @@ data class GameRoom(val name:String, val lang:String, val segments:String, val t
         }
 
         if(players.count { it.alive }==1){
-            broadcast("win ${winner.name}")
+            winner=players.first { it.alive }.name
+            broadcast("win $winner")
             state=GameState.ENDED
+
+            //kicks all dead player
+            var x=0
+            while(x<players.size){
+                if(!players[x].online){
+                    broadcast("kick ${players[x].name}")
+                    players.removeAt(x)
+                }else{
+                    x++
+                }
+            }
         }else {
             broadcast("new $currentSegment")
             broadcast("start ${players[currentPlayer].name}")
@@ -168,6 +194,24 @@ data class GameRoom(val name:String, val lang:String, val segments:String, val t
     }
 
     /**
+     * Kicks a player from the player list
+     */
+    suspend fun kick(username: String) {
+        if(state==GameState.RUNNING){
+            throw IllegalStateException("Cannot kick while running")
+        }
+
+        val player=players.firstOrNull{it.name==username}
+        if(player!=null){
+            if(player.isSessionAlive()) {
+                player.session?.close(CloseReason(CloseReason.Codes.GOING_AWAY,"Kicked"))
+            }
+            players.remove(player)
+            broadcast("kick $username")
+        }
+    }
+
+    /**
      * Prepare the room for closing. Closes all players and spectators session
      */
     suspend fun close() {
@@ -186,4 +230,5 @@ data class GameRoom(val name:String, val lang:String, val segments:String, val t
         players.clear()
         spectators.clear()
     }
+
 }

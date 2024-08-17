@@ -27,6 +27,8 @@ fun main(args: Array<String>) {
                 for((_,room) in MainData.rooms){
                     if(room.state==GameState.RUNNING){
                         room.tickTime()
+                    }else{
+                        room.tickKick()
                     }
                 }
             }

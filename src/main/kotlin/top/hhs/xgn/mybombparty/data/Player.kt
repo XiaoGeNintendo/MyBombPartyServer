@@ -12,6 +12,7 @@ data class Player(val name:String, var life:Int){
     val alive: Boolean
         get() = life!=0
 
+
     /**
      * This variable is lazily set.
      *

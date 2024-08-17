@@ -96,7 +96,7 @@ fun Application.configureSockets() {
 
             sendSerialized(room) //send current room first
 
-            if(room.state==GameState.BEFORE_START || room.players.any{it.name==userName}){
+            if(room.state!=GameState.RUNNING || room.players.any{it.name==userName}){
 
                 var newPlayer=!room.players.any{it.name==userName}
 
@@ -117,10 +117,10 @@ fun Application.configureSockets() {
                 try{
                     while(true){
                         val msg=receiveString().trim()
-                        if(!msg.checkValid(1000)){
-                            //directly reject
+                        if(msg.length>250){
                             continue
                         }
+
                         if(msg=="start"){
                             if(room.isAdmin(userName) && room.state!=GameState.RUNNING && room.players.size>=2){
                                 room.start()
@@ -128,6 +128,7 @@ fun Application.configureSockets() {
                             }else{
                                 println("Could not start game of $roomID ${room.isAdmin(userName)} ${room.state==GameState.BEFORE_START} ${room.players.size>=2}")
                             }
+                            continue
                         }
                         if(msg=="closeRoom" && room.isAdmin(userName)){
                             //close room
@@ -135,6 +136,12 @@ fun Application.configureSockets() {
                             MainData.rooms.remove(roomID)
                             println("Room $roomID closed!")
                             break
+                        }
+
+                        if(msg.startsWith("kick#") && room.isAdmin(userName) && room.state!=GameState.RUNNING){
+                            //kick certain person
+                            room.kick(msg.split("#")[1])
+                            continue
                         }
                         room.processIncomingMessage(userName,msg)
                     }

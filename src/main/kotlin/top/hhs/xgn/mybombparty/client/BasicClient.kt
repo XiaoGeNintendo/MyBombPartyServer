@@ -22,7 +22,7 @@ var host="localhost"
 var port=8058
 var username="ZJS"
 
-val clientVersion="2"
+val clientVersion="4"
 
 suspend fun roomPhase(){
 
