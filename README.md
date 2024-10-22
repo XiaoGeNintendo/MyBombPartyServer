@@ -7,13 +7,17 @@ This project also includes a way-too-simple client for testing. For other client
 # Implementing your own client
 OK, in short, there are three websocket entrance points: `/rooms` `/createRoom` and `/join/{roomID}`. All exchanges are in TEXT frames.
 
-After you have made a successful WS connection with the server, before anything else you should send your client version so that the server can check. The current server version can be seen [here](https://github.com/XiaoGeNintendo/MyBombPartyServer/blob/70693b07b741642341db5de2cba43f6b096759c6/src/main/kotlin/top/hhs/xgn/mybombparty/server/MainData.kt#L25) and the tutorial is now on version **"3"** (without quotes).
+After you have made a successful WS connection with the server, before anything else you should send your client version so that the server can check. The current server version can be seen [here](https://github.com/XiaoGeNintendo/MyBombPartyServer/blob/main/src/main/kotlin/top/hhs/xgn/mybombparty/server/MainData.kt#L25) and the tutorial is now on version **"3"** (without quotes).
+
+## (HTTP) /
+Visit this page over HTTP to test whether the server has been deployed correctly.
 
 ## /rooms
 The $2n+1$-th frame will be the ID of the room, and the $2n+2$-th frame will be a serialization of the [GameRoomPreview](https://github.com/XiaoGeNintendo/MyBombPartyServer/blob/main/src/main/kotlin/top/hhs/xgn/mybombparty/data/GameRoomPreview.kt).
 
-The server closes the connection after all data are sent.
+**In 4.1 you can visit this page over HTTP as well**
 
+The server closes the connection after all data are sent. 
 ## /createRoom
 You should send a serialization of the [GameRoomPreview](https://github.com/XiaoGeNintendo/MyBombPartyServer/blob/main/src/main/kotlin/top/hhs/xgn/mybombparty/data/GameRoomPreview.kt) you want to create. Player count and state does not matter.
 
