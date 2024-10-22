@@ -28,7 +28,7 @@ fun Application.configureSockets() {
 
         webSocket("/rooms") {
             //first check client version
-            if(receiveString()!=MainData.requireClientVersion){
+            if(receiveString() !in MainData.requireClientVersion){
                 close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT,"Invalid Client Version"))
                 return@webSocket
             }
@@ -42,7 +42,7 @@ fun Application.configureSockets() {
 
         webSocket("/createRoom"){
             //first check client version
-            if(receiveString()!=MainData.requireClientVersion){
+            if(receiveString() !in MainData.requireClientVersion){
                 close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT,"Invalid Client Version"))
                 return@webSocket
             }
@@ -69,13 +69,12 @@ fun Application.configureSockets() {
                     close(CloseReason(CloseReason.Codes.NORMAL, "OK"))
                 }
             }catch(e:Exception){
-                System.err.println("Cannot create room:")
-                e.printStackTrace()
+                close(CloseReason(CloseReason.Codes.INTERNAL_ERROR,e.toString()))
             }
         }
 
         webSocket("/join/{id}") {
-            if(receiveString()!=MainData.requireClientVersion){
+            if(receiveString() !in MainData.requireClientVersion){
                 close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT,"Invalid Client Version"))
                 return@webSocket
             }

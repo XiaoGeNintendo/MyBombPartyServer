@@ -22,5 +22,5 @@ object MainData {
     val rooms=HashMap<String, GameRoom>()
     val dicts=HashMap<String,HashSet<String>>()
     val segments=HashMap<String,HashSet<String>>()
-    val requireClientVersion="4"
+    val requireClientVersion= arrayOf("4","4.1")
 }
