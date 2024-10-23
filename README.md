@@ -15,11 +15,11 @@ Visit this page over HTTP to test whether the server has been deployed correctly
 ## /rooms
 The $2n+1$-th frame will be the ID of the room, and the $2n+2$-th frame will be a serialization of the [GameRoomPreview](https://github.com/XiaoGeNintendo/MyBombPartyServer/blob/main/src/main/kotlin/top/hhs/xgn/mybombparty/data/GameRoomPreview.kt).
 
-**In 4.1 you can visit this page over HTTP as well**
+**In 4.1 you can visit this page over HTTP as well. This is specially added for Godot**
 
 The server closes the connection after all data are sent. 
 ## /createRoom
-You should send a serialization of the [GameRoomPreview](https://github.com/XiaoGeNintendo/MyBombPartyServer/blob/main/src/main/kotlin/top/hhs/xgn/mybombparty/data/GameRoomPreview.kt) you want to create. Player count and state does not matter.
+You should send a serialization (JSON) of the [GameRoomPreview](https://github.com/XiaoGeNintendo/MyBombPartyServer/blob/main/src/main/kotlin/top/hhs/xgn/mybombparty/data/GameRoomPreview.kt) you want to create. Player count and state does not matter.
 
 The server closes the connection after receiving.
 
@@ -31,6 +31,7 @@ The server first sends a serialization of [GameRoom](https://github.com/XiaoGeNi
 ### Game State Related
 - `startRoom` - the game has started
 - `close` - the room is about to close
+- `win <username>` - a winner has been found and the game is officially ended
 
 ### Ticking
 - `countdown <x>` - x/10 seconds left for this turn
@@ -40,7 +41,7 @@ The server first sends a serialization of [GameRoom](https://github.com/XiaoGeNi
 - `disconnect <username>` - someone's net is broken
 - `connect <username>` - someone's net is back up again
 - `new_spectator <username>` - a new spectator joins
-
+- `kick <username>` - someone is kicked/lost connection during preparation time
 ### Gameplay
 - `type <word>` - the current player types this word. This is not accumulative, which means that if `type shell` is given, the user is just typing 'shell', not add 'shell' to the last `type` command.
 - `success <word>` - the confirmed word passes verification
@@ -55,3 +56,8 @@ The server first sends a serialization of [GameRoom](https://github.com/XiaoGeNi
 You can send out commands as well (note they are separated with `#`):
 - `type#<word>` - player is current typing.
 - `confirm#<word>` - player confirms this word
+- `kick#<username>` - (only by room master) kick someone
+- `start` - (only by master) start the game
+- `closeRoom` - (only by master) close the room
+
+The room master is the first person to join the room
