@@ -8,14 +8,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import top.hhs.xgn.mybombparty.data.GameState
+import java.io.File
 
 fun main(args: Array<String>) {
 
     //load dictionary
-    MainData.loadDictionary("en","sowpods.txt")
-    MainData.loadSegment("en_easy","en_easy.txt")
-    MainData.loadSegment("en_normal","en_normal.txt")
-    MainData.loadSegment("en_hard","en_hard.txt")
+    for(dictionary in File("dict/").listFiles()!!){
+        MainData.loadDictionary(dictionary.nameWithoutExtension,dictionary.name)
+    }
+    for(segment in File("seg/").listFiles()!!){
+        MainData.loadSegment(segment.nameWithoutExtension,segment.name)
+    }
 
     runBlocking {
 
@@ -37,7 +40,7 @@ fun main(args: Array<String>) {
         val arg:Array<String>
         if(args.size<2) {
             arg = arrayOf("0.0.0.0", "8058")
-            println("Warning: Starting on default port. Consider adding two more arguments ip and port")
+            println("Warning: Starting on default ip/port 0.0.0.0:8058. Consider adding two more arguments ip and port")
         }else{
             arg=args
         }

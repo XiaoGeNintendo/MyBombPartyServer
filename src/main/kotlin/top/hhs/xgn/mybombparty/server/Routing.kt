@@ -20,6 +20,13 @@ fun Application.configureRouting() {
         get("/rooms"){
             call.respondText(Json.encodeToString(MainData.rooms))
         }
+        get("/langs"){
+            call.respondText(Json.encodeToString(MainData.dicts.keys))
+        }
+        get("/segments"){
+            call.respondText(Json.encodeToString(MainData.segments.keys))
+        }
+
         // Static plugin. Try to access `/static/index.html`
         static("/static") {
             resources("static")
